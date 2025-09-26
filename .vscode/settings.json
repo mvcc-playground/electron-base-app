@@ -1,7 +1,8 @@
 {
   "workbench.colorTheme": "GitHub Dark Dimmed",
-  "editor.inlineSuggest.enabled": true,
-  // "[css]": {
-  //   "editor.inlineSuggest.enabled": true
-  // }
+  // "editor.inlineSuggest.enabled": true,
+  // // "[css]": {
+  // //   "editor.inlineSuggest.enabled": true
+  // // }
+  "geminicodeassist.inlineSuggestions.enableAuto": false
 }

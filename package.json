@@ -44,6 +44,7 @@
     "@libsql/client": "^0.15.15",
     "electron-squirrel-startup": "^1.0.1",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "wouter": "^3.7.1"
   }
 }
