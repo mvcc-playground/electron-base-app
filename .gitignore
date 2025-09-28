@@ -1,6 +1,6 @@
 temp
 *-ignore*
-
+dist
 # Logs
 logs
 *.log
