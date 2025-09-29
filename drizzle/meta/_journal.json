@@ -8,6 +8,13 @@
       "when": 1759024358587,
       "tag": "0000_create_todos",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1759179089031,
+      "tag": "0001_boring_shriek",
+      "breakpoints": true
     }
   ]
 }

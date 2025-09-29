@@ -14,7 +14,7 @@ import type { InValue } from "@libsql/client";
  */
 export function sql(
   strings: TemplateStringsArray,
-  ...values: InValue[]
+  ...values: readonly (InValue | undefined)[]
 ): { args: InValue[]; sql: string } {
   let queryText = "";
   const params: Array<InValue> = [];
@@ -23,11 +23,19 @@ export function sql(
   strings.forEach((str, i) => {
     queryText += str;
     if (i < values.length) {
-      params.push(values[i]!);
+      const value = values[i];
+      let param: InValue = value === undefined ? null : value;
+      // Trim string values to handle extra spaces
+      if (typeof param === "string") {
+        param = param.trim();
+      }
+      params.push(param);
       queryText += `?`;
     }
   });
 
+  // Trim and clean up the final query text by replacing multiple whitespace characters (including newlines) with a single space.
+  queryText = queryText.replace(/\s+/g, " ").trim();
   return {
     sql: queryText,
     args: params,

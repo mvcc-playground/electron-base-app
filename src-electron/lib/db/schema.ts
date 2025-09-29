@@ -5,3 +5,9 @@ export const todos = sqliteTable("todos", {
   content: text("content").notNull(),
   completed: integer("completed", { mode: "boolean" }).notNull().default(false),
 });
+
+export const test = sqliteTable("tests", {
+  id: integer("id").primaryKey(),
+  content: text("content").notNull(),
+  completed: integer("completed", { mode: "boolean" }).notNull().default(false),
+});

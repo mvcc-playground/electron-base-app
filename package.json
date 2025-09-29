@@ -49,6 +49,7 @@
     "drizzle-orm": "^0.44.5",
     "effect": "^3.17.14",
     "electron-squirrel-startup": "^1.0.1",
+    "glob": "^11.0.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "wouter": "^3.7.1"
