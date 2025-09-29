@@ -4,5 +4,8 @@
   // // "[css]": {
   // //   "editor.inlineSuggest.enabled": true
   // // }
-  "geminicodeassist.inlineSuggestions.enableAuto": false
+  "geminicodeassist.inlineSuggestions.enableAuto": false,
+  "[typescript]": {
+    "editor.formatOnSave": true
+  }
 }

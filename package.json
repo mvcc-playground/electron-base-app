@@ -9,7 +9,10 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "lint": "eslint --ext .ts,.tsx .",
+    "db": "drizzle-kit",
+    "db:generate": "drizzle-kit generate --name",
+    "db:push": "bun run scripts/migrate-to-latest.ts"
   },
   "keywords": [],
   "author": {
@@ -42,6 +45,9 @@
   },
   "dependencies": {
     "@libsql/client": "^0.15.15",
+    "drizzle-kit": "^0.31.5",
+    "drizzle-orm": "^0.44.5",
+    "effect": "^3.17.14",
     "electron-squirrel-startup": "^1.0.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

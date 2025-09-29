@@ -1,6 +1,7 @@
 temp
 *-ignore*
 dist
+*.db
 # Logs
 logs
 *.log
