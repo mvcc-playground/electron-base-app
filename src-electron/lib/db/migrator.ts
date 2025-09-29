@@ -1,7 +1,6 @@
 import type { Client } from "@libsql/client";
 import { glob } from "glob";
 import { readFile } from "node:fs/promises";
-import { sql } from "./sql-libsql";
 
 // type Stmt = { sql: string; args: Array<unknown> };
 
@@ -11,7 +10,8 @@ import { sql } from "./sql-libsql";
 // }
 interface Config {
   db: Client;
-  migrationTable: string;
+  migrationTable?: string;
+  migrationDir?: string;
 }
 export interface Migration {
   path: string;
@@ -23,11 +23,16 @@ export interface Migration {
 type Migrations = Migration[];
 
 export async function createMigrator(config: Config) {
-  const { db, migrationTable = "__migrations" } = config;
+  const {
+    db,
+    migrationTable = "__migrations",
+    migrationDir = "migrations",
+  } = config;
   console.info("iniciando migrations");
   await init({ db, migrationTable });
   return {
-    migrateToLatest: () => migrateToLatest({ db, migrationTable }),
+    migrateToLatest: () =>
+      migrateToLatest({ db, migrationTable, migrationDir }),
   };
 }
 
@@ -39,19 +44,27 @@ function splitSqlIntoStatements(sql: string): string[] {
     .filter((stmt) => stmt && !stmt.startsWith("--")); // Remove vazios e comentários que começam com --
 }
 
-async function init({ db }: Config) {
+async function init({
+  db,
+  migrationTable,
+}: {
+  db: Client;
+  migrationTable: string;
+}) {
   await db.batch([
-    sql`CREATE TABLE IF NOT EXISTS __migrations (
-      id INTEGER PRIMARY KEY NOT NULL,
-      migration_name TEXT NOT NULL,
-      content BLOB NOT NULL,
-      completed INTEGER DEFAULT 0 NOT NULL
-    );`,
+    {
+      sql: `CREATE TABLE IF NOT EXISTS ${migrationTable} (
+        id INTEGER PRIMARY KEY NOT NULL,
+        migration_name TEXT NOT NULL,
+        content BLOB NOT NULL,
+        completed INTEGER DEFAULT 0 NOT NULL
+      );`,
+      args: [],
+    },
   ]);
 }
 
 function validadeFileName(file_path: string) {
-  console.log(`validando o arquivo: ${file_path}`);
   const fileName = file_path.split("/").pop();
   if (!fileName) {
     throw new Error(`nome do arquivo invalido: ${fileName}`);
@@ -76,20 +89,28 @@ function validadeFileName(file_path: string) {
   if (Number.isNaN(migrationNumber)) {
     throw new Error(`numero de migracao invalido: ${migrationNumberStr}`);
   }
-
-  console.log(`validacao bem sucedida:`, { migrationNumber, migrationName });
   return { migrationNumber: migrationNumber.toString(), migrationName };
 }
 
-export async function migrateToLatest({ db, migrationTable }: Config) {
+export async function migrateToLatest({
+  db,
+  migrationTable,
+  migrationDir,
+}: {
+  db: Client;
+  migrationTable: string;
+  migrationDir: string;
+}) {
   let migrations: Migrations = [];
-  const migrationDir = "drizzle";
-  console.log(`procurando por migrations em: ${process.cwd()}/${migrationDir}`);
+  console.log(
+    `procurando por migrations em: ${process.cwd()}/${migrationDir} (tabela: ${migrationTable})`
+  );
   const filePaths = await glob(`${migrationDir}/*.sql`, { cwd: process.cwd() });
   if (filePaths.length === 0) {
     console.error("nenhuma migration encontrada");
     return;
   }
+  console.log(`encontrado ${filePaths.length} arquivo(s) de migration`);
   for (const file_path of filePaths) {
     const { migrationName, migrationNumber } = validadeFileName(file_path);
     // Substituição do Bun.file por fs/promises.readFile
@@ -114,10 +135,17 @@ export async function migrateToLatest({ db, migrationTable }: Config) {
   // garantir que seja aplicadas em ordem numérica
   migrations = migrations.sort((a, b) => a.id - b.id);
   // Find and apply new migrations
+  const summary = {
+    total: migrations.length,
+    alreadyApplied: 0,
+    appliedNow: 0,
+  };
   for (const migration of migrations) {
     if (!appliedIds.has(migration.id)) {
       try {
-        const { rows: [existMigration] } = await db.execute({
+        const {
+          rows: [existMigration],
+        } = await db.execute({
           sql: `SELECT migration_name FROM ${migrationTable} WHERE id = ?`,
           args: [migration.id],
         });
@@ -146,6 +174,7 @@ export async function migrateToLatest({ db, migrationTable }: Config) {
           ],
         });
         console.log(`✓ Applied migration: ${migration.name}`);
+        summary.appliedNow += 1;
       } catch (error) {
         console.error(`❌ Failed to apply migration ${migration.name}:`, error);
         throw error;
@@ -154,8 +183,12 @@ export async function migrateToLatest({ db, migrationTable }: Config) {
       console.log(
         `✓ Migration ${migration.id.toString()} already applied: ${migration.name}`
       );
+      summary.alreadyApplied += 1;
     }
   }
+  console.info(
+    `migrations finalizadas. total: ${summary.total}, aplicadas agora: ${summary.appliedNow}, ja aplicadas: ${summary.alreadyApplied}`
+  );
   // verificar qual foi a ultima ou se é a primeira.
   // fazer a migração
 }

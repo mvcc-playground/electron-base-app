@@ -9,6 +9,7 @@ import { createMigrator } from "../src-electron/lib/db/migrator";
 const migrator = await createMigrator({
   db: client,
   migrationTable: "__migrations",
+  migrationDir: "drizzle",
 });
 
 migrator.migrateToLatest();
