@@ -78,7 +78,7 @@ function validadeFileName(file_path: string) {
   const firstUnderscoreIndex = baseName.indexOf("_");
   if (firstUnderscoreIndex === -1) {
     throw new Error(
-      `nome do arquivo invalido, sem numero de migracao: ${fileName}`
+      `nome do arquivo invalido, sem numero de migração: ${fileName}`
     );
   }
 
@@ -87,7 +87,7 @@ function validadeFileName(file_path: string) {
 
   const migrationNumber = Number(migrationNumberStr);
   if (Number.isNaN(migrationNumber)) {
-    throw new Error(`numero de migracao invalido: ${migrationNumberStr}`);
+    throw new Error(`numero de migração invalido: ${migrationNumberStr}`);
   }
   return { migrationNumber: migrationNumber.toString(), migrationName };
 }
@@ -129,6 +129,7 @@ export async function migrateToLatest({
   const appliedIds = new Set(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     appliedMigrations.rows
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((row: any) => Number(row.id))
       .filter((id) => Number.isFinite(id))
   );

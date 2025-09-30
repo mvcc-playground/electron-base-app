@@ -12,4 +12,4 @@ const migrator = await createMigrator({
   migrationDir: "drizzle",
 });
 
-migrator.migrateToLatest();
+await migrator.migrateToLatest();
