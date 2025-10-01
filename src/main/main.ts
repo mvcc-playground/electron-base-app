@@ -1,8 +1,7 @@
+import "./load-env";
 import { app, BrowserWindow } from "electron";
 import started from "electron-squirrel-startup";
 import path from "node:path";
-import { runMigrations } from "../lib/db/run-migrations";
-import "./load-env";
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
@@ -35,14 +34,12 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.once("ready", async () => {
-  // Em resumo, essa linha fixa um caminho de banco local seguro por padrão sem sobrescrever configurações já definidas.
-  // A linha ainda faz diferença. Ela só roda se process.env.LIBSQL_FILE vier vazio, fixando o caminho em app.getPath("userData")/app.db. Sem isso, a lógica em src/lib/db/db.ts cai para os defaults
-  // dev.db (dev) ou db/app.db (prod) relativos ao process.cwd(). Em build empacotado, esse diretório costuma ser dentro do .asar, muitas vezes só leitura, e o app não conseguiria abrir/criar o
-  // banco. Se você garantir que .env/.env.prod sempre definam LIBSQL_FILE, pode remover, mas manter o fallback evita quebrar o app em casos onde a variável não venha setada.
-  process.env.LIBSQL_FILE ??= path.join(app.getPath("userData"), "app.db");
-  console.warn("path:::::", path.join(app.getPath("userData"), "app.db"));
+  // Calcula caminho final do banco com base nas variaveis validadas.
+  const { env } = await import("./env");
+  process.env.DATABASE_FILE = env.DATABASE_FILE;
 
   try {
+    const { runMigrations } = await import("../lib/db/run-migrations");
     await runMigrations();
   } catch (error) {
     console.error("falha ao executar migrations", error);
