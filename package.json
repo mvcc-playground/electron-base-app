@@ -52,6 +52,7 @@
     "glob": "^11.0.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "vite-plugin-inspect": "^11.3.3",
     "wouter": "^3.7.1"
   }
 }

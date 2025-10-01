@@ -127,7 +127,6 @@ export async function migrateToLatest({
     args: [],
   });
   const appliedIds = new Set(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     appliedMigrations.rows
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((row: any) => Number(row.id))
