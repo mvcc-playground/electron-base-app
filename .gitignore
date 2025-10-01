@@ -2,6 +2,9 @@ temp
 *-ignore*
 dist
 *.db
+*.db-wal
+*.db-shm
+
 # Logs
 logs
 *.log

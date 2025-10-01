@@ -1,10 +1,3 @@
-import { client } from "../src/lib/db/db";
-import { createMigrator } from "../src/lib/db/migrator";
+import { runMigrations } from "../src/lib/db/run-migrations";
 
-const migrator = await createMigrator({
-  db: client,
-  migrationTable: "__migrations",
-  migrationDir: "drizzle",
-});
-
-await migrator.migrateToLatest();
+await runMigrations();

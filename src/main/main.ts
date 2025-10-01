@@ -2,6 +2,7 @@ import { type Client } from "@libsql/client";
 import { app, BrowserWindow } from "electron";
 import started from "electron-squirrel-startup";
 import path from "node:path";
+import { runMigrations } from "../lib/db/run-migrations";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -36,14 +37,18 @@ const createWindow = () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on("ready", function () {
-  // try {
-  //   client = createClient({
-  //     url: "file:./tmp/dev.db",
-  //   });
-  // } catch (error) {
-  //   console.error(error);
-  // }
+app.once("ready", async () => {
+  // Em resumo, essa linha fixa um caminho de banco local seguro por padrão sem sobrescrever configurações já definidas.
+  process.env.LIBSQL_FILE ??= path.join(app.getPath("userData"), "app.db");
+
+  try {
+    await runMigrations();
+  } catch (error) {
+    console.error("falha ao executar migrations", error);
+    app.quit();
+    return;
+  }
+
   return createWindow();
 });
 
